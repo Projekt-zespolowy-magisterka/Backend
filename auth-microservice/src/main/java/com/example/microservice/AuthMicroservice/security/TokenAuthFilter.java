@@ -43,7 +43,7 @@ public class TokenAuthFilter extends OncePerRequestFilter {
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
 
 //        setResponseHeaders(request, response);
-
+        log.info("Filter called");
         final String authHeader = getAuthHeader(request);
         if(!isHeaderValid(authHeader)){
             if(log.isTraceEnabled()){

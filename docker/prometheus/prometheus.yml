@@ -1,0 +1,20 @@
+global:
+  scrape_interval: 4s
+  evaluation_interval: 2s
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['prometheus:9090']
+  - job_name: 'auth-mc'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['host.docker.internal:8081'] #TODO FIX FOR PORT # only for demo purposes don't use host.docker.internal in production CHANGE FOR NAME OF RUNNING CONTAINER
+        labels:
+          application: 'Auth Service'
+  - job_name: 'api-gateway'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['host.docker.internal:8080'] ## only for demo purposes don't use host.docker.internal in production
+        labels:
+          application: 'Api Gateway'

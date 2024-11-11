@@ -1,0 +1,146 @@
+version: '4'
+
+services:
+  #  # Example Auth Service (replace with your actual service)
+  #  auth-service:
+  #    image: your-auth-service-image # Replace with actual image
+  #    container_name: auth-service
+  #    ports:
+  #      - "8081:8081"
+  #    labels:
+  #      application: "auth-service"
+  #    environment:
+  #      SPRING_PROFILES_ACTIVE: "docker"
+  #    networks:
+  #      - monitoring
+  #    restart: unless-stopped
+  #
+  #  # Example API Gateway Service (replace with your actual service)
+  #  api-gateway:
+  #    image: your-api-gateway-image # Replace with actual image
+  #    container_name: api-gateway
+  #    ports:
+  #      - "8080:8080"
+  #    labels:
+  #      application: "api-gateway"
+  #    environment:
+  #      SPRING_PROFILES_ACTIVE: "docker"
+  #    networks:
+  #      - monitoring
+  #    restart: unless-stopped
+
+
+#Monitoring
+  # Prometheus Service
+  prometheus:
+    image: prom/prometheus:v2.46.0
+    container_name: prometheus
+    command:
+      - --enable-feature=exemplar-storage
+      - --config.file=/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+#    networks:
+#      - monitoring
+#    restart: unless-stopped
+
+  # Loki Service (for logging)
+  loki:
+    image: grafana/loki:main
+    container_name: loki
+    command: [ "-config.file=/etc/loki/local-config.yaml" ]
+    ports:
+      - "3100:3100"
+#    networks:
+#      - monitoring
+#    restart: unless-stopped
+
+  # Grafana Service (for dashboards)
+  grafana:
+    image: grafana/grafana:10.1.0
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./docker/grafana:/etc/grafana/provisioning/datasources:ro
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+#    networks:
+#      - monitoring
+#    restart: unless-stopped
+
+  tempo:
+    image: grafana/tempo:2.2.2
+    container_name: tempo
+    command: [ "-config.file=/etc/tempo.yaml" ]
+    volumes:
+      - ./docker/tempo/tempo.yml:/etc/tempo.yaml:ro
+      - ./data/tempo:/tmp/tempo
+    ports:
+      - "3110:3100"  # Tempo
+      - "9411:9411" # zipkin
+
+#  # Example Auth Service (replace with your actual service)
+#  auth-service:
+#    image: your-auth-service-image # Replace with actual image
+#    container_name: auth-service
+#    ports:
+#      - "8081:8081"
+#    labels:
+#      application: "auth-service"
+#    environment:
+#      SPRING_PROFILES_ACTIVE: "docker"
+#    networks:
+#      - monitoring
+#    restart: unless-stopped
+#
+#  # Example API Gateway Service (replace with your actual service)
+#  api-gateway:
+#    image: your-api-gateway-image # Replace with actual image
+#    container_name: api-gateway
+#    ports:
+#      - "8080:8080"
+#    labels:
+#      application: "api-gateway"
+#    environment:
+#      SPRING_PROFILES_ACTIVE: "docker"
+#    networks:
+#      - monitoring
+#    restart: unless-stopped
+
+#  mongodb-springboot:
+#    image: mongo:5.0
+#    container_name: mongodb-springboot
+#    ports:
+#      - "27018:27018" # Exposes MongoDB on port 27018
+#    volumes:
+#      - mongodb-app-data:/data/db
+#    networks:
+#      - monitoring
+#    restart: unless-stopped
+#
+#  # MongoDB instance for the Python service (running on port 27017)
+#  mongodb:
+#    image: mongo:5.0
+#    container_name: mongodb
+#    ports:
+#      - "27017:27017" # Exposes MongoDB on port 27017
+#    volumes:
+#      - mongodb-data:/data/db
+#    networks:
+#      - monitoring
+#    restart: unless-stopped
+
+#networks:
+#  monitoring:
+#    driver: bridge
+
+#volumes:
+#  mongodb-app-data:
+#    driver: local
+#  mongodb-python-data:
+#    driver: local

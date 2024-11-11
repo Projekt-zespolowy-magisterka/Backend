@@ -1,6 +1,7 @@
 package com.example.microservice.apigateway.config;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.cloud.gateway.filter.factory.SpringCloudCircuitBreakerFilterFactory;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
@@ -30,10 +31,20 @@ public class GatewayConfig {
     public RouteLocator routes(RouteLocatorBuilder builder) {
         return builder.routes()
                 .route(AUTH_MC_ID, r -> r.path(AUTH_PATH)
-                        .filters(f -> f.filter(securityConfig))
+                        .filters(f ->
+                                f
+                                        .circuitBreaker(config -> config
+                                                .setName("authCircuitBreaker")
+                                                .setFallbackUri("forward:/fallback"))
+                                        .filter(securityConfig))
                         .uri(AUTH_MC_URI))
                 .route(AUTH_MC_TOKEN_ID, r -> r.path(AUTH_TOKEN_PATH)
-                        .filters(f -> f.filter(securityConfig))
+                        .filters(f ->
+                                f
+                                        .circuitBreaker(config -> config
+                                                .setName("authCircuitBreaker")
+                                                .setFallbackUri("forward:/fallback"))
+                                        .filter(securityConfig))
                         .uri(AUTH_MC_URI))
 //                .route(DISCOVERY_SERVER_ID, r -> r.path(DISCOVERY_SERVER_PATH)
 //                        .filters(f -> f.filter(securityConfig))

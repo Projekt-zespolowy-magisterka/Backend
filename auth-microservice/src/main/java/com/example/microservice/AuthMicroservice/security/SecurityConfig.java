@@ -40,6 +40,9 @@ public class SecurityConfig {
     private static final String DELETE_USER = "/app/user/{id}";
     private static final String FIND_USER_BY_ID = "/app/user/{id}";
     private static final String FIND_USER_BY_EMAIL = "/app/user/email/**";
+    //TODO PUTTING IT PUBLIC CHANGE TO RESTRICTED AFTER FINISH
+    private static final String SWAGGER_API = "/swagger-ui.html";
+    private static final String PROMETHEUS = "/actuator/prometheus";
 
     @Bean
     public SecurityFilterChain SecurityFilterChain(HttpSecurity http) throws Exception {
@@ -48,7 +51,11 @@ public class SecurityConfig {
                 .cors().disable()
                 .authorizeHttpRequests(authorize ->
 //                                authorize.requestMatchers("**").permitAll()
-                                authorize.requestMatchers(HttpMethod.POST, REGISTER, LOGIN)
+                                authorize.requestMatchers(PROMETHEUS)
+                                        .permitAll()
+                                        .requestMatchers(HttpMethod.GET, SWAGGER_API)
+                                        .permitAll()
+                                        .requestMatchers(HttpMethod.POST, REGISTER, LOGIN)
                                         .permitAll()
                                         .requestMatchers(FIND_USER_BY_ID, UPDATE_USER, DELETE_USER)
                                         .hasAnyAuthority(ADMIN_AUTHORITY, USER_AUTHORITY)
