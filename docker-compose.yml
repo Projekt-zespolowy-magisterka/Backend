@@ -29,6 +29,36 @@ services:
   #      - monitoring
   #    restart: unless-stopped
 
+#  Databases
+  mongodb-auth-mc:
+    image: mongo:5.0
+    container_name: mongodb-auth-mc
+    ports:
+      - "27018:27018" # Exposes MongoDB on port 27018
+    volumes:
+      - mongodb-auth-mc-data:/data/db
+#      networks:
+#        - monitoring
+#      restart: unless-stopped
+
+  mongodb-prediction-mc:
+    image: mongo:5.0
+    container_name: mongodb-prediction-mc
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb-prediction-mc-data:/data/db
+#      networks:
+#        - monitoring
+#      restart: unless-stopped
+
+  redis-prediction-mc:
+    image: redis
+    container_name: redis-prediction-mc
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-prediction-mc-data:/data
 
 #Monitoring
   # Prometheus Service
@@ -84,63 +114,20 @@ services:
       - "3110:3100"  # Tempo
       - "9411:9411" # zipkin
 
-#  # Example Auth Service (replace with your actual service)
-#  auth-service:
-#    image: your-auth-service-image # Replace with actual image
-#    container_name: auth-service
-#    ports:
-#      - "8081:8081"
-#    labels:
-#      application: "auth-service"
-#    environment:
-#      SPRING_PROFILES_ACTIVE: "docker"
-#    networks:
-#      - monitoring
-#    restart: unless-stopped
-#
-#  # Example API Gateway Service (replace with your actual service)
-#  api-gateway:
-#    image: your-api-gateway-image # Replace with actual image
-#    container_name: api-gateway
-#    ports:
-#      - "8080:8080"
-#    labels:
-#      application: "api-gateway"
-#    environment:
-#      SPRING_PROFILES_ACTIVE: "docker"
-#    networks:
-#      - monitoring
-#    restart: unless-stopped
 
-#  mongodb-springboot:
-#    image: mongo:5.0
-#    container_name: mongodb-springboot
-#    ports:
-#      - "27018:27018" # Exposes MongoDB on port 27018
-#    volumes:
-#      - mongodb-app-data:/data/db
-#    networks:
-#      - monitoring
-#    restart: unless-stopped
-#
-#  # MongoDB instance for the Python service (running on port 27017)
-#  mongodb:
-#    image: mongo:5.0
-#    container_name: mongodb
-#    ports:
-#      - "27017:27017" # Exposes MongoDB on port 27017
-#    volumes:
-#      - mongodb-data:/data/db
-#    networks:
-#      - monitoring
-#    restart: unless-stopped
+#Networks
 
 #networks:
 #  monitoring:
 #    driver: bridge
 
-#volumes:
-#  mongodb-app-data:
-#    driver: local
-#  mongodb-python-data:
-#    driver: local
+
+#Volumes
+
+volumes:
+  mongodb-auth-mc-data:
+    driver: local
+  mongodb-prediction-mc-data:
+    driver: local
+  redis-prediction-mc-data:
+    driver: local
