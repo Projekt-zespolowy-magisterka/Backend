@@ -4,36 +4,48 @@ version: '4'
 services:
 
   #  Local setup
-#  auth-service:
-#    build:
-#      context: ./auth-microservice
-#      dockerfile: Dockerfile
-#    container_name: auth-mc-container
-#    ports:
-#      - "8081:8081"
-#    labels:
-#      application: "auth-mc"
-##    depends_on:
-##      mongodb-auth-mc:
-##        condition: service_healthy
-##    networks:
-##      - app-network
-##      - monitoring-network
-#    restart: unless-stopped
-#
-#  api-gateway:
-#    build:
-#      context: ./api-gateway
-#      dockerfile: Dockerfile
-#    container_name: api-gateway-container
-#    ports:
-#      - "8080:8080"
-#    labels:
-#      application: "api-gateway"
-##    networks:
-##      - app-network
-##      - monitoring-network
-#    restart: unless-stopped
+  auth-service:
+    build:
+      context: ./auth-microservice
+      dockerfile: Dockerfile
+    container_name: auth-mc-container
+    ports:
+      - "8081:8081"
+    labels:
+      application: "auth-mc"
+#    depends_on:
+#      mongodb-auth-mc:
+#        condition: service_healthy
+#    networks:
+#      - app-network
+#      - monitoring-network
+    restart: unless-stopped
+
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    container_name: api-gateway-container
+    ports:
+      - "8080:8080"
+    labels:
+      application: "api-gateway"
+#    networks:
+#      - app-network
+#      - monitoring-network
+    restart: unless-stopped
+
+  price_predictor:
+    build:
+      context: "D:/Program Files/PycharmProjects/Price_predictor" #TODO changge to your predition project directory
+      dockerfile: Dockerfile
+    container_name: prediction-mc-container
+    ports:
+      - "5000:5000"
+  #    networks:
+  #      - app-network
+  #      - monitoring-network
+    restart: unless-stopped
 
 # IMAGE PRODUCTION USE
   #  auth-service:
@@ -155,7 +167,7 @@ services:
       - ./data/tempo:/tmp/tempo
     ports:
       - "3110:3100"  # Tempo
-      - "9411:9411" # zipkin
+      - "9411:9411" # zipkin TODO FIX IT because it map to localhost and there is no image running of it it is explisicly put
 
 #Networks
 #networks:
