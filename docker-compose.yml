@@ -1,16 +1,50 @@
 version: '4'
+#version: '3.8'
 
 services:
-  #  # Example Auth Service (replace with your actual service)
+
+  #  Local setup
+#  auth-service:
+#    build:
+#      context: ./auth-microservice
+#      dockerfile: Dockerfile
+#    container_name: auth-mc-container
+#    ports:
+#      - "8081:8081"
+#    labels:
+#      application: "auth-mc"
+##    depends_on:
+##      mongodb-auth-mc:
+##        condition: service_healthy
+##    networks:
+##      - app-network
+##      - monitoring-network
+#    restart: unless-stopped
+#
+#  api-gateway:
+#    build:
+#      context: ./api-gateway
+#      dockerfile: Dockerfile
+#    container_name: api-gateway-container
+#    ports:
+#      - "8080:8080"
+#    labels:
+#      application: "api-gateway"
+##    networks:
+##      - app-network
+##      - monitoring-network
+#    restart: unless-stopped
+
+# IMAGE PRODUCTION USE
   #  auth-service:
   #    image: your-auth-service-image # Replace with actual image
   #    container_name: auth-service
   #    ports:
   #      - "8081:8081"
-  #    labels:
-  #      application: "auth-service"
-  #    environment:
-  #      SPRING_PROFILES_ACTIVE: "docker"
+#      labels:
+#        application: "auth-service"
+#      environment:
+#        SPRING_PROFILES_ACTIVE: "docker"
   #    networks:
   #      - monitoring
   #    restart: unless-stopped
@@ -34,23 +68,23 @@ services:
     image: mongo:5.0
     container_name: mongodb-auth-mc
     ports:
-      - "27018:27018" # Exposes MongoDB on port 27018
+      - "27019:27017" # Exposes MongoDB on port 27018
     volumes:
       - mongodb-auth-mc-data:/data/db
-#      networks:
-#        - monitoring
-#      restart: unless-stopped
+#    networks:
+#      - app-network
+    restart: unless-stopped
 
   mongodb-prediction-mc:
     image: mongo:5.0
     container_name: mongodb-prediction-mc
     ports:
-      - "27017:27017"
+      - "27018:27017"
     volumes:
       - mongodb-prediction-mc-data:/data/db
-#      networks:
-#        - monitoring
-#      restart: unless-stopped
+#    networks:
+#      - app-network
+    restart: unless-stopped
 
   redis-prediction-mc:
     image: redis
@@ -59,6 +93,9 @@ services:
       - "6379:6379"
     volumes:
       - redis-prediction-mc-data:/data
+#    networks:
+#      - app-network
+    restart: unless-stopped
 
 #Monitoring
   # Prometheus Service
@@ -73,8 +110,9 @@ services:
     volumes:
       - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
 #    networks:
-#      - monitoring
-#    restart: unless-stopped
+#      - monitoring-network
+#      - app-network
+    restart: unless-stopped
 
   # Loki Service (for logging)
   loki:
@@ -84,8 +122,9 @@ services:
     ports:
       - "3100:3100"
 #    networks:
-#      - monitoring
-#    restart: unless-stopped
+#      - monitoring-network
+#      - app-network
+    restart: unless-stopped
 
   # Grafana Service (for dashboards)
   grafana:
@@ -100,13 +139,17 @@ services:
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
       - GF_AUTH_DISABLE_LOGIN_FORM=true
 #    networks:
-#      - monitoring
-#    restart: unless-stopped
+#      - monitoring-network
+#      - app-network
+    restart: unless-stopped
 
   tempo:
     image: grafana/tempo:2.2.2
     container_name: tempo
     command: [ "-config.file=/etc/tempo.yaml" ]
+#    networks:
+#      - monitoring-network
+#      - app-network
     volumes:
       - ./docker/tempo/tempo.yml:/etc/tempo.yaml:ro
       - ./data/tempo:/tmp/tempo
@@ -114,16 +157,15 @@ services:
       - "3110:3100"  # Tempo
       - "9411:9411" # zipkin
 
-
 #Networks
-
 #networks:
-#  monitoring:
+#  app-network:
+#    driver: bridge
+#  monitoring-network:
 #    driver: bridge
 
 
 #Volumes
-
 volumes:
   mongodb-auth-mc-data:
     driver: local

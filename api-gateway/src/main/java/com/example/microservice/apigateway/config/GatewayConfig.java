@@ -18,7 +18,12 @@ public class GatewayConfig {
     private static final String AUTH_MC_TOKEN_ID = "auth-mc-token";
     private static final String AUTH_PATH = "/app/user/**";
     private static final String AUTH_TOKEN_PATH = "/app/token/**";
-    private static final String AUTH_MC_URI = "lb://auth-mc";
+    private static final String AUTH_MC_URI = "http://localhost:8081";
+
+    //PREDICTION MC
+    private static final String PREDICTION_MC_ID = "prediction-mc";
+    private static final String PREDICTION_PATH = "/predictor/**";
+    private static final String PREDICTION_MC_URI = "http://localhost:5000";
 
     //DISCOVERY SERVER
     private static final String DISCOVERY_SERVER_ID = "discovery-server";
@@ -46,6 +51,14 @@ public class GatewayConfig {
                                                 .setFallbackUri("forward:/fallback"))
                                         .filter(securityConfig))
                         .uri(AUTH_MC_URI))
+                .route(PREDICTION_MC_ID, r -> r.path(PREDICTION_PATH)
+                        .filters(f ->
+                                f
+                                        .circuitBreaker(config -> config
+                                                .setName("authCircuitBreaker")
+                                                .setFallbackUri("forward:/fallback"))
+                                        .filter(securityConfig))
+                        .uri(PREDICTION_MC_URI))
 //                .route(DISCOVERY_SERVER_ID, r -> r.path(DISCOVERY_SERVER_PATH)
 //                        .filters(f -> f.filter(securityConfig))
 //                        .uri(DISCOVERY_SERVER_URI))

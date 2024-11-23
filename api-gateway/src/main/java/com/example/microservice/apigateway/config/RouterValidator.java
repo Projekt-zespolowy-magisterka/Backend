@@ -11,10 +11,12 @@ public class RouterValidator {
 
     private static final String REGISTER = "/app/user/register";
     private static final String LOGIN = "/app/user/auth";
-    private static final String EUREKA_SERVER = "/eureka";
+    private static final String STOCK_DATA = "/predictor/data/saved";
+//    private static final String EUREKA_SERVER = "/eureka";
 
     public static final List<String> openEndpoints = List.of(
-            REGISTER, LOGIN, EUREKA_SERVER
+            REGISTER, LOGIN, STOCK_DATA
+//            , EUREKA_SERVER
     );
 
     public Predicate<ServerHttpRequest> isSecured =

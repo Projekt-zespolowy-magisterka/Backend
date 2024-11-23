@@ -20,7 +20,6 @@
 	<modules>
 		<module>auth-microservice</module>
 		<module>api-gateway</module>
-		<module>discovery-server</module>
 	</modules>
 
 	<properties>
@@ -59,15 +58,26 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
+<!--					<image>-->
+<!--						<name>StockMaster/${project.artifactId}</name>-->
+<!--						<builder>dashaun/builder:tiny</builder>-->
+<!--						<publish>true</publish>-->
+<!--					</image>-->
+<!--					<docker>-->
+<!--						<publishRegistry>-->
+<!--							<username></username>-->
+<!--							<password></password>-->
+<!--						</publishRegistry>-->
+<!--					</docker>-->
+					<image>
+						<builder>paketobuildpacks/builder-jammy-base:latest</builder>
+					</image>
 					<excludes>
 						<exclude>
 							<groupId>org.projectlombok</groupId>
 							<artifactId>lombok</artifactId>
 						</exclude>
 					</excludes>
-					<image>
-						<builder>paketobuildpacks/builder-jammy-base:latest</builder>
-					</image>
 				</configuration>
 			</plugin>
 			<plugin>

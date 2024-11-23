@@ -14,6 +14,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.reactive.CorsConfigurationSource;
+import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
@@ -32,6 +37,8 @@ public class SecurityConfig {
     //APP URL PATHS
     private static final String REGISTER = "/app/user/register";
     private static final String LOGIN = "/app/user/auth";
+    private static final String STOCK_DATA = "/predictor/data/saved";
+    private static final String STOCK_PREDICTION_DATA = "/predictor/prediction";
 
     //AUTHORIZED
     private static final String LOGOUT_PATH = "/app/user/auth/logout";
@@ -53,11 +60,11 @@ public class SecurityConfig {
 //                                authorize.requestMatchers("**").permitAll()
                                 authorize.requestMatchers(PROMETHEUS)
                                         .permitAll()
-                                        .requestMatchers(HttpMethod.GET, SWAGGER_API)
+                                        .requestMatchers(HttpMethod.GET, SWAGGER_API, STOCK_DATA)
                                         .permitAll()
                                         .requestMatchers(HttpMethod.POST, REGISTER, LOGIN)
                                         .permitAll()
-                                        .requestMatchers(FIND_USER_BY_ID, UPDATE_USER, DELETE_USER)
+                                        .requestMatchers(FIND_USER_BY_ID, UPDATE_USER, DELETE_USER, STOCK_PREDICTION_DATA)
                                         .hasAnyAuthority(ADMIN_AUTHORITY, USER_AUTHORITY)
                                         .requestMatchers(ALL_REQUESTS, FIND_USER_BY_EMAIL)
                                         .hasAuthority(ADMIN_AUTHORITY)
