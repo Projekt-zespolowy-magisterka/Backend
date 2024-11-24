@@ -32,6 +32,10 @@ public class GatewayConfig {
     private static final String PREDICTION_MC_DOCKER_ID = "prediction-mc-docker";
     private static final String PREDICTION_MC_DOCKER_URI = "http://prediction-mc-container:5000";
 
+    private static final String AUTH_MC_DOCKER_ID = "auth-mc-docker";
+    private static final String AUTH_MC_TOKEN_DOCKER_ID = "auth-mc-token-docker";
+    private static final String AUTH_MC_DOCKER_URI = "http://auth-mc-container:8081";
+
     //DISCOVERY SERVER
     private static final String DISCOVERY_SERVER_ID = "discovery-server";
     private static final String DISCOVERY_SERVER_STATIC_ID = "discovery-server-static";
@@ -68,12 +72,14 @@ public class GatewayConfig {
 //                                        .filter(securityConfig))
 //                        .uri(PREDICTION_MC_URI))
 
-                .route(AUTH_MC_ID, r -> configureRoute(r, AUTH_PATH, AUTH_MC_URI))
-                .route(AUTH_MC_TOKEN_ID, r -> configureRoute(r, AUTH_TOKEN_PATH, AUTH_MC_URI))
+//                .route(AUTH_MC_ID, r -> configureRoute(r, AUTH_PATH, AUTH_MC_URI))
+//                .route(AUTH_MC_TOKEN_ID, r -> configureRoute(r, AUTH_TOKEN_PATH, AUTH_MC_URI))
 //                .route(PREDICTION_MC_ID, r -> configureRoute(r, PREDICTION_PATH, PREDICTION_MC_URI))
 
                 //Docker URI/s TODO change all aplications for profiles
                 .route(PREDICTION_MC_DOCKER_ID, r -> configureRoute(r, PREDICTION_PATH, PREDICTION_MC_DOCKER_URI))
+                .route(AUTH_MC_DOCKER_ID, r -> configureRoute(r, AUTH_PATH, AUTH_MC_DOCKER_URI))
+                .route(AUTH_MC_TOKEN_DOCKER_ID, r -> configureRoute(r, AUTH_TOKEN_PATH, AUTH_MC_DOCKER_URI))
 
 //                .route(DISCOVERY_SERVER_ID, r -> r.path(DISCOVERY_SERVER_PATH)
 //                        .filters(f -> f.filter(securityConfig))
