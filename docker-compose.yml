@@ -47,6 +47,20 @@ services:
   #      - monitoring-network
     restart: unless-stopped
 
+  frontend:
+    build:
+      context: "D:/Program Files (x86)/IntelJ_Proj/StockMasterFrontend" #TODO changge to your predition project directory
+      dockerfile: docker/Dockerfile
+    container_name: stockmaster-frontend
+    ports:
+      - "3001:3001"
+    labels:
+        application: "frontend"
+    environment:
+      - PORT=3001
+    restart: unless-stopped
+
+
 # IMAGE PRODUCTION USE
   #  auth-service:
   #    image: your-auth-service-image # Replace with actual image

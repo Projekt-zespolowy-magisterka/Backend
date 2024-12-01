@@ -15,6 +15,14 @@ import java.util.Arrays;
 public class CorsConfig{
 
     //CORS VARIABLES
+    private static final String REACT_ORIGIN = "http://localhost:3001";
+    private static final String REACT_ORIGIN2 = "http://localhost:3001/";
+    private static final String REACT_ORIGIN_DOCKER = "http://stockmaster-frontend:3001/";
+    private static final String REACT_ORIGIN_DOCKER2 = "http://stockmaster-frontend:3001/";
+    private static final String REACT_ORIGIN_DOCKER3 = "http://frontend:3001/";
+    private static final String REACT_ORIGIN_DOCKER4 = "http://frontend:3001/";
+
+
     private static final String ANGULAR_ORIGIN = "http://localhost:4200";
     //TODO SET HERE ORIGIN AND MAKE ANGULAR ORIGNS ADJUSTED
     private static final String ANGULAR_ORIGIN2 = "https://our_company_origin";
@@ -49,7 +57,13 @@ public class CorsConfig{
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         corsConfiguration.setAllowCredentials(true);
 
-        corsConfiguration.setAllowedOrigins(Arrays.asList(ANGULAR_ORIGIN, ANDROID_ORIGIN, ANDROID_ORIGIN2, ANGULAR_ORIGIN2, ANGULAR_ORIGIN3));
+        corsConfiguration.setAllowedOrigins(Arrays.asList(REACT_ORIGIN_DOCKER, REACT_ORIGIN_DOCKER2, REACT_ORIGIN_DOCKER3, REACT_ORIGIN_DOCKER4,
+                REACT_ORIGIN, REACT_ORIGIN2, ANGULAR_ORIGIN, ANDROID_ORIGIN, ANDROID_ORIGIN2,
+                ANGULAR_ORIGIN2, ANGULAR_ORIGIN3,
+                "http://hot.docker.internal:3001",
+                "http://host.docker.internal:8080",
+                "http://host.docker.internal:3001/",
+                "http://host.docker.internal:8080/"));
 
         corsConfiguration.setAllowedHeaders(Arrays.asList(ORIGIN_HEADER, ACCESS_CONTROL_ALLOW_ORIGIN, CONTENT_TYPE, ACCEPT, AUTHORIZATION,
                 INCLUDE_TOKEN, ORIGIN_ACCEPT, X_REQUESTED_WITH, ACCESS_CONTROL_REQUEST_METHOD, ACCESS_CONTROL_REQUEST_HEADERS));
