@@ -34,6 +34,7 @@ public class User implements UserDetails {
     @Field
     private Address address;
     private String password;
+    private List<String> favoritesStocks;
     private String role;
     private Date dateCreated;
     private Boolean accountNonExpired;

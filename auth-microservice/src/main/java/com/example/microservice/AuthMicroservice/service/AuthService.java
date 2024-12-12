@@ -4,23 +4,28 @@ import com.example.microservice.AuthMicroservice.entity.User;
 import com.example.microservice.AuthMicroservice.entity.enums.Role;
 import com.example.microservice.AuthMicroservice.exception.UserExistException;
 import com.example.microservice.AuthMicroservice.repository.UserRepository;
+import com.example.microservice.AuthMicroservice.request.AddFavoriteStockRequest;
 import com.example.microservice.AuthMicroservice.request.AuthRequest;
 import com.example.microservice.AuthMicroservice.request.RegistrationRequest;
 import com.example.microservice.AuthMicroservice.response.AuthResponse;
 import com.example.microservice.AuthMicroservice.response.BasicResponse;
+import com.example.microservice.AuthMicroservice.response.FavoritesStockResponse;
 import com.example.microservice.AuthMicroservice.response.FoundUserResponse;
 import com.example.microservice.AuthMicroservice.security.TokenService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 import static com.example.microservice.AuthMicroservice.security.TokenService.TWENTY_MINUTES;
 
@@ -106,6 +111,7 @@ public class AuthService {
                 .email(registrationRequest.getEmail())
                 .phone(registrationRequest.getPhone())
                 .address(registrationRequest.getAddress())
+                .favoritesStocks(Collections.emptyList())
                 .password(passwordEncoder.encode(registrationRequest.getPassword()))
                 .role(assignedRole)
                 .dateCreated(new Date(System.currentTimeMillis()))
@@ -187,6 +193,31 @@ public class AuthService {
                 .id(user.getId())
                 .userEmail(user.getEmail())
                 .build();
+    }
+
+    public FavoritesStockResponse addStocksToFavorites(AddFavoriteStockRequest addFavoriteStockRequest) {
+        var user = userRepository.findUserById(addFavoriteStockRequest.getUserId())
+                .orElseThrow(() -> new UsernameNotFoundException("User with ID " + addFavoriteStockRequest.getUserId() + " not found"));
+
+        List<String> currentFavorites = user.getFavoritesStocks();
+        List<String> newStocks = addFavoriteStockRequest.getStockSymbol();
+
+        List<String> stocksToAdd = newStocks.stream()
+                .filter(stock -> !currentFavorites.contains(stock)).toList();
+
+        if (!stocksToAdd.isEmpty()) {
+            currentFavorites.addAll(stocksToAdd);
+            user.setFavoritesStocks(currentFavorites);
+            userRepository.save(user);
+        }
+
+        return new FavoritesStockResponse(currentFavorites);
+    }
+
+    public FavoritesStockResponse getFavoriteStocks(String id) {
+        var user = userRepository.findUserById(id);
+        return user.map(value -> new FavoritesStockResponse(value.getFavoritesStocks()))
+                .orElseGet(() -> new FavoritesStockResponse(Collections.emptyList()));
     }
 
     private static boolean userHasOrganizationEmail(String email) {

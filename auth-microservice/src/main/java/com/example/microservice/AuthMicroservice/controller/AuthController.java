@@ -1,10 +1,12 @@
 package com.example.microservice.AuthMicroservice.controller;
 
 import com.example.microservice.AuthMicroservice.entity.User;
+import com.example.microservice.AuthMicroservice.request.AddFavoriteStockRequest;
 import com.example.microservice.AuthMicroservice.request.AuthRequest;
 import com.example.microservice.AuthMicroservice.request.RegistrationRequest;
 import com.example.microservice.AuthMicroservice.response.AuthResponse;
 import com.example.microservice.AuthMicroservice.response.BasicResponse;
+import com.example.microservice.AuthMicroservice.response.FavoritesStockResponse;
 import com.example.microservice.AuthMicroservice.response.FoundUserResponse;
 import com.example.microservice.AuthMicroservice.service.AuthService;
 import lombok.RequiredArgsConstructor;
@@ -53,6 +55,15 @@ public class AuthController {
         return new ResponseEntity<>(searchedUsers, HttpStatus.OK);
     }
 
+    @GetMapping("/{id}/favorites")
+    public ResponseEntity<FavoritesStockResponse>getFavoritesStocks(@PathVariable("id") String id){
+        FavoritesStockResponse response = userService.getFavoriteStocks(id);
+        if (log.isDebugEnabled()){
+            log.debug("[getFavoritesStocks] Favorites response: {}", response);
+        }
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
     @PostMapping("/register")
     public ResponseEntity<AuthResponse>register(@RequestBody RegistrationRequest registrationRequest){
 
@@ -71,6 +82,15 @@ public class AuthController {
             log.debug("[authenticate] Authenticated user: {}",authUser);
         }
         return new ResponseEntity<>(authUser, HttpStatus.CREATED);
+    }
+
+    @PostMapping("favorites")
+    public ResponseEntity<FavoritesStockResponse>addStocksToFavorites(@RequestBody AddFavoriteStockRequest addFavoriteStockRequest){
+        FavoritesStockResponse response = userService.addStocksToFavorites(addFavoriteStockRequest);
+        if (log.isDebugEnabled()){
+            log.debug("[addStocksToFavorites] Adding stock to favorites response: {}", response);
+        }
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PatchMapping("")
