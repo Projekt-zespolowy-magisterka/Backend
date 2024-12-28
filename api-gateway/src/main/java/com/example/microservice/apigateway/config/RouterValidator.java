@@ -9,8 +9,8 @@ import java.util.function.Predicate;
 @Service
 public class RouterValidator {
 
-    private static final String REGISTER = "/app/user/register";
-    private static final String LOGIN = "/app/user/auth";
+    private static final String REGISTER = "/app/register";
+    private static final String LOGIN = "/app/auth";
     private static final String STOCK_DATA = "/predictor/data/saved";
 //    private static final String EUREKA_SERVER = "/eureka";
 

@@ -35,8 +35,8 @@ public class SecurityConfig {
     private static final String USER_AUTHORITY = "USER";
 
     //APP URL PATHS
-    private static final String REGISTER = "/app/user/register";
-    private static final String LOGIN = "/app/user/auth";
+    private static final String REGISTER = "/app/register";
+    private static final String LOGIN = "/app/auth";
     private static final String STOCK_DATA = "/predictor/data/saved";
     private static final String STOCK_PREDICTION_DATA = "/predictor/prediction";
 
@@ -67,7 +67,7 @@ public class SecurityConfig {
                                         .requestMatchers(FIND_USER_BY_ID, UPDATE_USER, DELETE_USER, STOCK_PREDICTION_DATA)
                                         .hasAnyAuthority(ADMIN_AUTHORITY, USER_AUTHORITY)
                                         .requestMatchers(ALL_REQUESTS, FIND_USER_BY_EMAIL)
-                                        .hasAuthority(ADMIN_AUTHORITY)
+                                        .hasAuthority(USER_AUTHORITY)
                                         .anyRequest()
                                         .authenticated()
                 )

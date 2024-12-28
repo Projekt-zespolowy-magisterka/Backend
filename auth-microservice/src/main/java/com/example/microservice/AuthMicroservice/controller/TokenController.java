@@ -15,7 +15,7 @@ import java.util.Optional;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @RestController
-@RequestMapping("/app")
+@RequestMapping("/app/token/")
 @RequiredArgsConstructor
 @Slf4j
 public class TokenController {
@@ -23,7 +23,7 @@ public class TokenController {
     private final TokenService tokenService;
     private static final String TOKEN_NOT_FOUND_MESSAGE = "Token not found";
 
-    @GetMapping("token/{id}")
+    @GetMapping("{id}")
     public ResponseEntity<Token> getTokenById(@PathVariable("id") String id){
 
         Optional<Token> searchedToken = tokenService.findTokenById(id);
@@ -33,7 +33,7 @@ public class TokenController {
         return new ResponseEntity<>(searchedToken.orElseThrow(() -> new ResponseStatusException(NOT_FOUND, TOKEN_NOT_FOUND_MESSAGE)), HttpStatus.OK);
     }
 
-    @GetMapping("token")
+    @GetMapping()
     public ResponseEntity<List<Token>> getAllTokens(){
 
         List<Token> searchedTokens = tokenService.findAllTokens();
@@ -43,7 +43,7 @@ public class TokenController {
         return new ResponseEntity<>(searchedTokens , HttpStatus.OK);
     }
 
-    @GetMapping("token/user/{id}")
+    @GetMapping("user/{id}")
     public ResponseEntity<List<Token>> getAllUserTokens(@PathVariable("id") String id){
 
         List<Token> searchedTokens = tokenService.findAllUserTokens(id);
@@ -53,7 +53,7 @@ public class TokenController {
         return new ResponseEntity<>(searchedTokens , HttpStatus.OK);
     }
 
-    @GetMapping("token/refresh")
+    @GetMapping("refresh")
     public ResponseEntity<String> getRefreshedAccessToken(@RequestHeader("Authorization") String authorizationHeader){
         String refreshedToken = tokenService.refreshAccessToken(authorizationHeader);
         if (log.isDebugEnabled()){
@@ -62,7 +62,7 @@ public class TokenController {
         return new ResponseEntity<>(refreshedToken, HttpStatus.OK);
     }
 
-    @DeleteMapping("token/expired")
+    @DeleteMapping("expired")
     public void deleteAllExpiredTokens(){
         tokenService.deleteAllExpiredToken();
         if (log.isDebugEnabled()){

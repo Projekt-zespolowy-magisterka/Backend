@@ -17,9 +17,11 @@ public class GatewayConfig {
 
     //AUTH MC
     private static final String AUTH_MC_ID = "auth-mc";
-    private static final String AUTH_MC_TOKEN_ID = "auth-mc-token";
-    private static final String AUTH_PATH = "/app/user/**";
-    private static final String AUTH_TOKEN_PATH = "/app/token/**";
+//    private static final String AUTH_MC_TOKEN_ID = "auth-mc-token";
+//    private static final String AUTH_MC_FAV_ID = "auth-mc-fav";
+    private static final String AUTH_PATH = "/app/**";
+//    private static final String AUTH_FAVORITE_PATH = "/app/favorites";
+//    private static final String AUTH_TOKEN_PATH = "/app/token/**";
     private static final String AUTH_MC_URI = "http://localhost:8081";
 
     //PREDICTION MC
@@ -72,14 +74,15 @@ public class GatewayConfig {
 //                                        .filter(securityConfig))
 //                        .uri(PREDICTION_MC_URI))
 
-//                .route(AUTH_MC_ID, r -> configureRoute(r, AUTH_PATH, AUTH_MC_URI))
+                .route(AUTH_MC_ID, r -> configureRoute(r, AUTH_PATH, AUTH_MC_URI))
+//                .route(AUTH_MC_FAV_ID, r -> configureRoute(r, AUTH_FAVORITE_PATH, AUTH_MC_URI))
 //                .route(AUTH_MC_TOKEN_ID, r -> configureRoute(r, AUTH_TOKEN_PATH, AUTH_MC_URI))
-//                .route(PREDICTION_MC_ID, r -> configureRoute(r, PREDICTION_PATH, PREDICTION_MC_URI))
+                .route(PREDICTION_MC_ID, r -> configureRoute(r, PREDICTION_PATH, PREDICTION_MC_URI))
 
-                //Docker URI/s TODO change all aplications for profiles
-                .route(PREDICTION_MC_DOCKER_ID, r -> configureRoute(r, PREDICTION_PATH, PREDICTION_MC_DOCKER_URI))
-                .route(AUTH_MC_DOCKER_ID, r -> configureRoute(r, AUTH_PATH, AUTH_MC_DOCKER_URI))
-                .route(AUTH_MC_TOKEN_DOCKER_ID, r -> configureRoute(r, AUTH_TOKEN_PATH, AUTH_MC_DOCKER_URI))
+//                //Docker URI/s TODO change all aplications for profiles
+//                .route(PREDICTION_MC_DOCKER_ID, r -> configureRoute(r, PREDICTION_PATH, PREDICTION_MC_DOCKER_URI))
+//                .route(AUTH_MC_DOCKER_ID, r -> configureRoute(r, AUTH_PATH, AUTH_MC_DOCKER_URI))
+//                .route(AUTH_MC_TOKEN_DOCKER_ID, r -> configureRoute(r, AUTH_TOKEN_PATH, AUTH_MC_DOCKER_URI))
 
 //                .route(DISCOVERY_SERVER_ID, r -> r.path(DISCOVERY_SERVER_PATH)
 //                        .filters(f -> f.filter(securityConfig))
@@ -93,9 +96,9 @@ public class GatewayConfig {
     private Buildable<Route> configureRoute(PredicateSpec r, String path, String uri) {
         return r.path(path)
                 .filters(f -> f
-                        .circuitBreaker(config -> config
-                                .setName("authCircuitBreaker")
-                                .setFallbackUri("forward:/fallback"))
+//                        .circuitBreaker(config -> config
+//                                .setName("authCircuitBreaker")
+//                                .setFallbackUri("forward:/fallback"))
                         .filter(securityConfig))
                 .uri(uri);
     }

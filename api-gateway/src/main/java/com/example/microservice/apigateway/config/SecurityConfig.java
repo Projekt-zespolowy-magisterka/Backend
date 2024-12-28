@@ -58,14 +58,14 @@ public class SecurityConfig implements org.springframework.cloud.gateway.filter.
     private static final String ADMIN_AUTHORITY = "ADMIN";
     private static final String USER_AUTHORITY = "USER";
 
-    //APP URL PATHS
-    private static final String ALL_REQUESTS = "/app/**";
-    private static final String REGISTER = "/app/user";
-    private static final String LOGIN = "/app/user/auth";
-    private static final String UPDATE_USER = "/app/user";
-    private static final String DELETE_USER = "/app/user/{id}";
-    private static final String FIND_USER_BY_ID = "/app/user/{id}";
-    private static final String FIND_USER_BY_EMAIL = "/app/user/email/{email}";
+//    //APP URL PATHS
+//    private static final String ALL_REQUESTS = "/app/**";
+//    private static final String REGISTER = "/app/user";
+//    private static final String LOGIN = "/app/user/auth";
+//    private static final String UPDATE_USER = "/app/user";
+//    private static final String DELETE_USER = "/app/user/{id}";
+//    private static final String FIND_USER_BY_ID = "/app/user/{id}";
+//    private static final String FIND_USER_BY_EMAIL = "/app/user/email/{email}";
 
     //CORS VARIABLES
     //TODO CHANGE FOR SOME COMPANY ORIGINS AND ADJUST ANGULAR ORIGINS

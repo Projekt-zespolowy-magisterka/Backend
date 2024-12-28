@@ -5,6 +5,5 @@ import java.util.List;
 
 @Data
 public class AddFavoriteStockRequest {
-    String userId;
     List<String> stockSymbol;
 }

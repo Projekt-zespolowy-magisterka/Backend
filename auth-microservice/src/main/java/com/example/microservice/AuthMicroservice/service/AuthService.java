@@ -4,28 +4,21 @@ import com.example.microservice.AuthMicroservice.entity.User;
 import com.example.microservice.AuthMicroservice.entity.enums.Role;
 import com.example.microservice.AuthMicroservice.exception.UserExistException;
 import com.example.microservice.AuthMicroservice.repository.UserRepository;
-import com.example.microservice.AuthMicroservice.request.AddFavoriteStockRequest;
 import com.example.microservice.AuthMicroservice.request.AuthRequest;
 import com.example.microservice.AuthMicroservice.request.RegistrationRequest;
 import com.example.microservice.AuthMicroservice.response.AuthResponse;
-import com.example.microservice.AuthMicroservice.response.BasicResponse;
-import com.example.microservice.AuthMicroservice.response.FavoritesStockResponse;
 import com.example.microservice.AuthMicroservice.response.FoundUserResponse;
 import com.example.microservice.AuthMicroservice.security.TokenService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
 
 import static com.example.microservice.AuthMicroservice.security.TokenService.TWENTY_MINUTES;
 
@@ -35,7 +28,6 @@ import static com.example.microservice.AuthMicroservice.security.TokenService.TW
 @Slf4j
 public class AuthService {
 
-    private final WebClient.Builder webClientBuilder;
     private final UserRepository userRepository;
     private final AuthenticationManager authenticationManager;
     private final TokenService tokenService;
@@ -45,8 +37,6 @@ public class AuthService {
     private final static String USER_NOT_FOUND = "User not found";
     private final static String FOUND_USER = "User found";
     private final static String AUTHENTICATED = "Logged in";
-    private final static String USER_UPDATED = "Your account has been updated";
-    private final static String USER_DELETED = "Your account has been deleted";
     private final static String ORGANIZATION_EMAIL_SUFFIX = "@stock-master.org";
 
     public FoundUserResponse findUserById(String id) {
@@ -87,10 +77,6 @@ public class AuthService {
             }
             return foundUserResponse;
         }
-    }
-
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
     }
 
     public AuthResponse registerUser(RegistrationRequest registrationRequest) {
@@ -136,36 +122,6 @@ public class AuthService {
                 .build();
     }
 
-    //TODO TO ADJUST
-    public BasicResponse editUser(User editUser) {
-
-        BasicResponse basicResponse = new BasicResponse();
-        User fetchedUser = userRepository.findUserById(editUser.getId()).orElseThrow();
-        String newPassword = editUser.getPassword();
-        editUser.setDateCreated(fetchedUser.getDateCreated());
-        editUser.setRole(fetchedUser.getRole());
-        editUser.setAccountNonExpired(fetchedUser.getAccountNonExpired());
-        editUser.setAccountNonLocked(fetchedUser.getAccountNonLocked());
-        editUser.setEnabled(fetchedUser.getEnabled());
-        editUser.setCredentialsNonExpired(fetchedUser.getCredentialsNonExpired());
-        editUser.setAddress(editUser.getAddress());
-
-        if (!existPassword(newPassword)) {
-            editUser.setPassword(fetchedUser.getPassword());
-        } else {
-            editUser.setPassword(passwordEncoder.encode(editUser.getPassword()));
-        }
-        userRepository.save(editUser);
-        basicResponse.setMessage(USER_UPDATED);
-        return basicResponse;
-    }
-
-    public BasicResponse deleteUser(String id) {
-        BasicResponse basicResponse = new BasicResponse();
-        userRepository.deleteById(id);
-        basicResponse.setMessage(USER_DELETED);
-        return basicResponse;
-    }
 
     public AuthResponse authenticate(AuthRequest authRequest) {
         if (log.isTraceEnabled()) {
@@ -195,31 +151,6 @@ public class AuthService {
                 .build();
     }
 
-    public FavoritesStockResponse addStocksToFavorites(AddFavoriteStockRequest addFavoriteStockRequest) {
-        var user = userRepository.findUserById(addFavoriteStockRequest.getUserId())
-                .orElseThrow(() -> new UsernameNotFoundException("User with ID " + addFavoriteStockRequest.getUserId() + " not found"));
-
-        List<String> currentFavorites = user.getFavoritesStocks();
-        List<String> newStocks = addFavoriteStockRequest.getStockSymbol();
-
-        List<String> stocksToAdd = newStocks.stream()
-                .filter(stock -> !currentFavorites.contains(stock)).toList();
-
-        if (!stocksToAdd.isEmpty()) {
-            currentFavorites.addAll(stocksToAdd);
-            user.setFavoritesStocks(currentFavorites);
-            userRepository.save(user);
-        }
-
-        return new FavoritesStockResponse(currentFavorites);
-    }
-
-    public FavoritesStockResponse getFavoriteStocks(String id) {
-        var user = userRepository.findUserById(id);
-        return user.map(value -> new FavoritesStockResponse(value.getFavoritesStocks()))
-                .orElseGet(() -> new FavoritesStockResponse(Collections.emptyList()));
-    }
-
     private static boolean userHasOrganizationEmail(String email) {
         return email.contains(ORGANIZATION_EMAIL_SUFFIX);
     }
@@ -232,4 +163,4 @@ public class AuthService {
     private static boolean existPassword(String newPassword) {
         return newPassword != null;
     }
-}
+} 
