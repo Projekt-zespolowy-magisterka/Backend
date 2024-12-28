@@ -21,28 +21,40 @@ public class FavoriteController {
 
     private final FavoriteService favoriteService;
 
-    @GetMapping()
-    public ResponseEntity<FavoritesStockResponse> getFavoritesStocks(Principal principal){
-        FavoritesStockResponse response = favoriteService.getFavoriteStocks(principal.getName());
-        if (log.isDebugEnabled()){
+    @GetMapping
+    public ResponseEntity<FavoritesStockResponse> getFavoritesStocks(@AuthenticationPrincipal UserDetails userDetails) {
+        String userName = userDetails.getUsername();
+        FavoritesStockResponse response = favoriteService.getFavoriteStocks(userName);
+        if (log.isDebugEnabled()) {
             log.debug("[getFavoritesStocks] Favorites response: {}", response);
         }
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PostMapping()
-    public ResponseEntity<FavoritesStockResponse>addStocksToFavorites(
+    @PostMapping
+    public ResponseEntity<FavoritesStockResponse> addStockToFavorites(
             @RequestBody AddFavoriteStockRequest addFavoriteStockRequest,
             @AuthenticationPrincipal UserDetails userDetails
-    ){
-
+    ) {
         String userName = userDetails.getUsername();
-
-        FavoritesStockResponse response = favoriteService.addStocksToFavorites(addFavoriteStockRequest, userName);
-        if (log.isDebugEnabled()){
-            log.debug("[addStocksToFavorites] Adding stock to favorites response: {}", response);
+        FavoritesStockResponse response = favoriteService.addStockToFavorites(addFavoriteStockRequest.getStockSymbol().get(0), userName);
+        if (log.isDebugEnabled()) {
+            log.debug("[addStockToFavorites] Adding stock to favorites response: {}", response);
         }
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @DeleteMapping("/{stockSymbol}")
+    public ResponseEntity<FavoritesStockResponse> removeStockFromFavorites(
+            @PathVariable String stockSymbol,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        String userName = userDetails.getUsername();
+        FavoritesStockResponse response = favoriteService.removeStockFromFavorites(stockSymbol, userName);
+        if (log.isDebugEnabled()) {
+            log.debug("[removeStockFromFavorites] Removing stock from favorites response: {}", response);
+        }
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 }
+
