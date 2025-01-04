@@ -31,18 +31,11 @@ public class TokenAuthFilter extends OncePerRequestFilter {
     private final TokenService tokenService;
     private static final String AUTH_HEADER = "Authorization";
     private static final String BEARER_KEY_WORD = "Bearer ";
-    private static final String ORIGIN = "Origin";
-    private static final String ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
-    private static final String ACCESS_CONTROL_ALLOW_METHODS = "Access-Control-Allow-Methods";
-    private static final String ACCESS_CONTROL_ALLOW_HEADERS = "Access-Control-Allow-Headers";
-    private static final String ALLOWED_HEADERS = "Origin, X-Requested-With, Content-Type, Accept, Authorization";
-    private static final String ALLOWED_METHODS = "GET, POST, PUT, DELETE, OPTIONS";
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
 
-//        setResponseHeaders(request, response);
         log.info("Filter called");
         final String authHeader = getAuthHeader(request);
         if(!isHeaderValid(authHeader)){
@@ -87,13 +80,6 @@ public class TokenAuthFilter extends OncePerRequestFilter {
             }
             filterChain.doFilter(request,response);
         }
-    }
-
-    private static void setResponseHeaders(HttpServletRequest request, HttpServletResponse response) {
-        String origin = request.getHeader(ORIGIN);
-        response.setHeader(ACCESS_CONTROL_ALLOW_ORIGIN, origin);
-        response.setHeader(ACCESS_CONTROL_ALLOW_METHODS, ALLOWED_METHODS);
-        response.setHeader(ACCESS_CONTROL_ALLOW_HEADERS, ALLOWED_HEADERS);
     }
 
     protected String getAuthHeader(HttpServletRequest request) {

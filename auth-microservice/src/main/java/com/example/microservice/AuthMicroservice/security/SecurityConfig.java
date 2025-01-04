@@ -14,11 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.reactive.CorsConfigurationSource;
-import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
@@ -37,16 +33,19 @@ public class SecurityConfig {
     //APP URL PATHS
     private static final String REGISTER = "/app/register";
     private static final String LOGIN = "/app/auth";
-    private static final String STOCK_DATA = "/predictor/data/saved";
-    private static final String STOCK_PREDICTION_DATA = "/predictor/prediction";
+    private static final String STOCK_DATA = "/predictor/**";
 
     //AUTHORIZED
     private static final String LOGOUT_PATH = "/app/user/auth/logout";
     private static final String ALL_REQUESTS = "/app/**";
-    private static final String UPDATE_USER = "/app/user";
-    private static final String DELETE_USER = "/app/user/{id}";
-    private static final String FIND_USER_BY_ID = "/app/user/{id}";
-    private static final String FIND_USER_BY_EMAIL = "/app/user/email/**";
+    private static final String USER_OPERATIONS = "/app/users/me";
+    private static final String USER_FAVORITES_OPERATIONS = "/app/favorites/**";
+    private static final String USER_TOKEN_OPERATIONS = "/app/token/refresh";
+    //TODO nie wiem czy potrzebne jak nie to do usuniecia stad
+    private static final String DELETE_USER = "/app/users/{id}";
+    private static final String FIND_USER_BY_ID = "/app/users/{id}";
+    private static final String FIND_USER_BY_EMAIL = "/app/users/email/**";
+
     //TODO PUTTING IT PUBLIC CHANGE TO RESTRICTED AFTER FINISH
     private static final String SWAGGER_API = "/swagger-ui.html";
     private static final String PROMETHEUS = "/actuator/prometheus";
@@ -60,14 +59,14 @@ public class SecurityConfig {
 //                                authorize.requestMatchers("**").permitAll()
                                 authorize.requestMatchers(PROMETHEUS)
                                         .permitAll()
-                                        .requestMatchers(HttpMethod.GET, SWAGGER_API, STOCK_DATA)
+                                        .requestMatchers(HttpMethod.GET, SWAGGER_API)
                                         .permitAll()
                                         .requestMatchers(HttpMethod.POST, REGISTER, LOGIN)
                                         .permitAll()
-                                        .requestMatchers(FIND_USER_BY_ID, UPDATE_USER, DELETE_USER, STOCK_PREDICTION_DATA)
+                                        .requestMatchers(USER_OPERATIONS, STOCK_DATA, USER_FAVORITES_OPERATIONS, USER_TOKEN_OPERATIONS)
                                         .hasAnyAuthority(ADMIN_AUTHORITY, USER_AUTHORITY)
-                                        .requestMatchers(ALL_REQUESTS, FIND_USER_BY_EMAIL)
-                                        .hasAuthority(USER_AUTHORITY)
+                                        .requestMatchers(ALL_REQUESTS)
+                                        .hasAuthority(ADMIN_AUTHORITY)
                                         .anyRequest()
                                         .authenticated()
                 )
