@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 @Service
@@ -20,7 +21,11 @@ public class FavoriteService {
         var user = userRepository.findUserByEmail(userName)
                 .orElseThrow(() -> new UsernameNotFoundException("User with email " + userName + " not found"));
 
+        // Initialize currentFavorites if null
         List<String> currentFavorites = user.getFavoritesStocks();
+        if (currentFavorites == null) {
+            currentFavorites = new ArrayList<>();
+        }
 
         if (!currentFavorites.contains(stockSymbol)) {
             currentFavorites.add(stockSymbol);
@@ -36,6 +41,9 @@ public class FavoriteService {
                 .orElseThrow(() -> new UsernameNotFoundException("User with email " + userName + " not found"));
 
         List<String> currentFavorites = user.getFavoritesStocks();
+        if (currentFavorites == null) {
+            currentFavorites = new ArrayList<>();
+        }
 
         if (currentFavorites.contains(stockSymbol)) {
             currentFavorites.remove(stockSymbol);
@@ -45,6 +53,7 @@ public class FavoriteService {
 
         return new FavoritesStockResponse(currentFavorites);
     }
+
 
     public FavoritesStockResponse getFavoriteStocks(String email) {
         var user = userRepository.findUserByEmail(email);
