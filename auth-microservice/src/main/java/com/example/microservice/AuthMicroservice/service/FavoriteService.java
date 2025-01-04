@@ -23,7 +23,6 @@ public class FavoriteService {
         var user = userRepository.findUserByEmail(userName)
                 .orElseThrow(() -> new UsernameNotFoundException("User with email " + userName + " not found"));
 
-        // Initialize currentFavorites if null
         List<String> currentFavorites = user.getFavoritesStocks();
         if (currentFavorites == null) {
             currentFavorites = new ArrayList<>();
