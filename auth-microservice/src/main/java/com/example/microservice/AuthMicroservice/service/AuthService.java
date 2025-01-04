@@ -7,7 +7,6 @@ import com.example.microservice.AuthMicroservice.repository.UserRepository;
 import com.example.microservice.AuthMicroservice.request.AuthRequest;
 import com.example.microservice.AuthMicroservice.request.RegistrationRequest;
 import com.example.microservice.AuthMicroservice.response.AuthResponse;
-import com.example.microservice.AuthMicroservice.response.FoundUserResponse;
 import com.example.microservice.AuthMicroservice.security.TokenService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.Date;
-import java.util.NoSuchElementException;
+import java.util.Optional;
 
 import static com.example.microservice.AuthMicroservice.security.TokenService.TWENTY_MINUTES;
 
@@ -34,50 +33,8 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
 
     private final static String USER_CREATED = "User created";
-    private final static String USER_NOT_FOUND = "User not found";
-    private final static String FOUND_USER = "User found";
     private final static String AUTHENTICATED = "Logged in";
     private final static String ORGANIZATION_EMAIL_SUFFIX = "@stock-master.org";
-
-    public FoundUserResponse findUserById(String id) {
-        FoundUserResponse foundUserResponse = new FoundUserResponse();
-        try {
-            User fetchedUser = userRepository.findUserById(id).orElseThrow();
-            foundUserResponse.setUser(fetchedUser);
-            foundUserResponse.setMessage(FOUND_USER);
-            if (log.isDebugEnabled()) {
-                log.debug("[findUserById] Found user: {}", fetchedUser);
-            }
-            return foundUserResponse;
-        } catch (NoSuchElementException e) {
-            foundUserResponse.setUser(null);
-            foundUserResponse.setMessage(USER_NOT_FOUND);
-            if (log.isDebugEnabled()) {
-                log.debug("[findUserById] User with id: {}, not found", id);
-            }
-            return foundUserResponse;
-        }
-    }
-
-    public FoundUserResponse findUserByEmail(String email) {
-        FoundUserResponse foundUserResponse = new FoundUserResponse();
-        try {
-            User fetchedUser = userRepository.findUserByEmail(email).orElseThrow();
-            foundUserResponse.setUser(fetchedUser);
-            foundUserResponse.setMessage(FOUND_USER);
-            if (log.isDebugEnabled()) {
-                log.debug("[findUserByEmail] Found user: {}", fetchedUser);
-            }
-            return foundUserResponse;
-        } catch (NoSuchElementException e) {
-            foundUserResponse.setUser(null);
-            foundUserResponse.setMessage(USER_NOT_FOUND);
-            if (log.isDebugEnabled()) {
-                log.debug("[findUserByEmail] User with email: {}, not found", email);
-            }
-            return foundUserResponse;
-        }
-    }
 
     public AuthResponse registerUser(RegistrationRequest registrationRequest) {
         String email = registrationRequest.getEmail();
@@ -156,11 +113,7 @@ public class AuthService {
     }
 
     private boolean exist(String email) {
-        FoundUserResponse foundUserResponse = findUserByEmail(email);
-        return foundUserResponse.getUser() != null;
-    }
-
-    private static boolean existPassword(String newPassword) {
-        return newPassword != null;
+        Optional<User> fetchedUser = userRepository.findUserByEmail(email);
+        return fetchedUser.isPresent();
     }
 } 

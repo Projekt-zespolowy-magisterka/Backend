@@ -24,7 +24,6 @@ public class CorsConfig{
 
 
     private static final String ANGULAR_ORIGIN = "http://localhost:4200";
-    //TODO SET HERE ORIGIN AND MAKE ANGULAR ORIGNS ADJUSTED
     private static final String ANGULAR_ORIGIN2 = "https://our_company_origin";
     private static final String ANGULAR_ORIGIN3 = "http://localhost:4200/";
     private static final String ANDROID_ORIGIN = "https://10.0.2.2";
@@ -60,7 +59,6 @@ public class CorsConfig{
         corsConfiguration.setAllowedOrigins(Arrays.asList(REACT_ORIGIN_DOCKER, REACT_ORIGIN_DOCKER2, REACT_ORIGIN_DOCKER3, REACT_ORIGIN_DOCKER4,
                 REACT_ORIGIN, REACT_ORIGIN2, ANGULAR_ORIGIN, ANDROID_ORIGIN, ANDROID_ORIGIN2,
                 ANGULAR_ORIGIN2, ANGULAR_ORIGIN3,
-                "http://hot.docker.internal:3001",
                 "http://host.docker.internal:8080",
                 "http://host.docker.internal:3001/",
                 "http://host.docker.internal:8080/"));

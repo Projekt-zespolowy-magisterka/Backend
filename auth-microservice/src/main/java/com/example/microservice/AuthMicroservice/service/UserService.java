@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 @Service
 @RequiredArgsConstructor
@@ -26,26 +27,27 @@ public class UserService {
     private static final String USER_DELETED = "Your account has been deleted";
 
     public FoundUserResponse findUserById(String id) {
-        return findUser(userRepository.findUserById(id), id, "ID");
+        return findUser(id, userRepository::findUserById, "[findUserById]");
     }
 
     public FoundUserResponse findUserByEmail(String email) {
-        return findUser(userRepository.findUserByEmail(email), email, "email");
+        return findUser(email, userRepository::findUserByEmail, "[findUserByEmail]");
     }
 
-    private FoundUserResponse findUser(Optional<User> userOptional, String identifier, String identifierType) {
-        FoundUserResponse response = new FoundUserResponse();
-        if (userOptional.isPresent()) {
-            User fetchedUser = userOptional.get();
-            response.setUser(fetchedUser);
-            response.setMessage(FOUND_USER);
-            log.debug("[findUserBy{}] Found user: {}", identifierType, fetchedUser);
-        } else {
-            response.setUser(null);
-            response.setMessage(USER_NOT_FOUND);
-            log.debug("[findUserBy{}] User with {}: {} not found", identifierType, identifierType, identifier);
-        }
-        return response;
+    private FoundUserResponse findUser(String identifier, Function<String, Optional<User>> userFinder, String logPrefix) {
+        return userFinder.apply(identifier)
+                .map(user -> {
+                    if (log.isDebugEnabled()) {
+                        log.debug("{} Found user: {}", logPrefix, user);
+                    }
+                    return new FoundUserResponse(user, FOUND_USER);
+                })
+                .orElseGet(() -> {
+                    if (log.isDebugEnabled()) {
+                        log.debug("{} User not found for identifier: {}", logPrefix, identifier);
+                    }
+                    return new FoundUserResponse(null, USER_NOT_FOUND);
+                });
     }
 
     public List<User> getAllUsers() {
@@ -53,38 +55,46 @@ public class UserService {
     }
 
     public BasicResponse editUserByEmail(String email, EditUserRequest editUserRequest) {
-        return editUserByIdOrEmail(userRepository.findUserByEmail(email), email, editUserRequest, "email");
+        FoundUserResponse foundUser = findUserByEmail(email);
+        return editUser(foundUser.getUser(), editUserRequest);
     }
 
-    public BasicResponse editUser(String userId, EditUserRequest editUserRequest) {
-        return editUserByIdOrEmail(userRepository.findUserById(userId), userId, editUserRequest, "ID");
+//    TODO Czy napewno chcesz tej funkcji uzywać jesli zrobilas impla??
+    public BasicResponse editUserById(String userId, EditUserRequest editUserRequest) {
+        FoundUserResponse foundUser = findUserById(userId);
+        return editUser(foundUser.getUser(), editUserRequest);
     }
 
-    private BasicResponse editUserByIdOrEmail(Optional<User> userOptional, String identifier, EditUserRequest editUserRequest, String identifierType) {
-        User fetchedUser = userOptional.orElseThrow(() ->
-                new UsernameNotFoundException("User not found for " + identifierType + ": " + identifier));
+    private BasicResponse editUser(User user, EditUserRequest editUserRequest) {
+        throwIfUserNotFound(user);
 
-        updateUserInformation(fetchedUser, editUserRequest);
-        userRepository.save(fetchedUser);
+        User updatedUser = updateUserInformation(user, editUserRequest);
+        userRepository.save(updatedUser);
 
-        return createBasicResponse(USER_UPDATED);
+        return new BasicResponse(USER_UPDATED);
     }
 
-    private void updateUserInformation(User user, EditUserRequest editUserRequest) {
+    private User updateUserInformation(User user, EditUserRequest editUserRequest) {
         user.setFirstName(editUserRequest.getFirstName());
         user.setLastName(editUserRequest.getLastName());
         user.setPhone(editUserRequest.getPhoneNumber());
         user.setAddress(editUserRequest.getAddress());
+        return user;
     }
 
     public BasicResponse deleteUser(String id) {
         userRepository.deleteById(id);
-        return createBasicResponse(USER_DELETED);
+        return new BasicResponse(USER_DELETED);
     }
 
-    private BasicResponse createBasicResponse(String message) {
-        BasicResponse response = new BasicResponse();
-        response.setMessage(message);
-        return response;
+    private static void throwIfUserNotFound(User user) {
+        if(user == null){
+            throw new UsernameNotFoundException("User not found");
+        }
+    }
+
+//    TODO change password to implement
+    private static boolean existPassword(String newPassword) {
+        return newPassword != null;
     }
 }

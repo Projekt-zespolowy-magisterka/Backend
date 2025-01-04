@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -34,17 +33,16 @@ public class UserController {
     }
 
     @PatchMapping("/me")
-    public ResponseEntity<BasicResponse> editMyInfo(@RequestBody EditUserRequest editUserRequest, Principal principal) {
-        log.debug("Received payload: {}", editUserRequest);
+    public ResponseEntity<BasicResponse> editUserByEmail(@RequestBody EditUserRequest editUserRequest, Principal principal) {
+        log.debug("[editUserByEmail] Received payload: {}, and principal {}", editUserRequest, principal);
         String email = principal.getName();
         BasicResponse basicResponse = userService.editUserByEmail(email, editUserRequest);
         if (log.isDebugEnabled()) {
-            log.debug("[editMyInfo] Edited user response: {}", basicResponse);
+            log.debug("[editUserByEmail] Edited user response: {}", basicResponse);
         }
         return new ResponseEntity<>(basicResponse, HttpStatus.OK);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/all")
     public ResponseEntity<List<User>> getAllUsers() {
         List<User> allUsers = userService.getAllUsers();
@@ -54,8 +52,6 @@ public class UserController {
         return new ResponseEntity<>(allUsers, HttpStatus.OK);
     }
 
-
-    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<BasicResponse>deleteUser(@PathVariable String id){
         BasicResponse basicResponse = userService.deleteUser(id);
@@ -65,15 +61,12 @@ public class UserController {
         return new ResponseEntity<>(basicResponse, HttpStatus.OK);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}")
-    public ResponseEntity<BasicResponse>editUser(@PathVariable String id, @RequestBody EditUserRequest editUserRequest){
-        BasicResponse basicResponse = userService.editUser(id, editUserRequest);
+    public ResponseEntity<BasicResponse>editUserById(@PathVariable String id, @RequestBody EditUserRequest editUserRequest){
+        BasicResponse basicResponse = userService.editUserById(id, editUserRequest);
         if (log.isDebugEnabled()){
             log.debug("[editUser] Edited user response: {}",basicResponse);
         }
         return new ResponseEntity<>(basicResponse, HttpStatus.OK);
     }
-
-
 }

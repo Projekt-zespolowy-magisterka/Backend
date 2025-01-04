@@ -15,7 +15,7 @@ import java.util.Optional;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @RestController
-@RequestMapping("/app/token/")
+@RequestMapping("/app/token")
 @RequiredArgsConstructor
 @Slf4j
 public class TokenController {
