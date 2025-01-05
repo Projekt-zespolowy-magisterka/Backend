@@ -69,4 +69,13 @@ public class UserController {
         }
         return new ResponseEntity<>(basicResponse, HttpStatus.OK);
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<FoundUserResponse> getUserById(@PathVariable String id) {
+        FoundUserResponse foundUserResponse = userService.findUserById(id);
+        if (log.isDebugEnabled()) {
+            log.debug("[getUserById] FoundUserResponse: {}", foundUserResponse);
+        }
+        return new ResponseEntity<>(foundUserResponse, HttpStatus.OK);
+    }
 }
