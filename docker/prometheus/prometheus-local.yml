@@ -5,22 +5,22 @@ global:
 scrape_configs:
   - job_name: 'prometheus'
     static_configs:
-      - targets: ['prometheus:9090']
+      - targets: ['prometheus-local:9090']
   - job_name: 'auth-mc'
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: ['auth-mc-container:8081']
+      - targets: ['host.docker.internal:8081']
         labels:
           application: 'Auth Service'
   - job_name: 'api-gateway'
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: ['api-gateway-container:8080']
+      - targets: ['host.docker.internal:8080']
         labels:
           application: 'Api Gateway'
   - job_name: 'prediction-mc'
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: [ 'prediction-mc-container:5000']
+      - targets: [ 'host.docker.internal:5000']
         labels:
           application: 'Prediction Service'

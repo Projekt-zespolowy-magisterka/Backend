@@ -1,0 +1,145 @@
+spring:
+  application:
+    name: api-gateway
+  profiles:
+    active: docker
+
+server:
+  port: 8080
+
+##Authorization microservice
+#spring.security.oauth2.resourceserver.jwt.issuer-uri=http://user-mc/app/user
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http:
+          server:
+            requests: true
+    tags:
+      application: api-gateway
+  tracing:
+    sampling:
+      probability: 1.0
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  endpoint:
+    health:
+      show-details: always
+  health:
+    circuitbreakers:
+      enabled: true
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        registerHealthIndicator: true
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 5s
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        minimum-number-of-calls: 5
+  timelimiter:
+    configs:
+      default:
+        timeout-duration: 900s #TODO zrobić asynchroniczną odpowiedź na model uczenia i inne długie requesty
+  retry:
+    configs:
+      default:
+        max-attempts: 3
+        wait-duration: 2s
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    # Uncomment and configure the following lines for Swagger documentation URLs
+    # urls:
+    #   - name: Auth Service
+    #     url: /aggregate/auth-mc/v3/api-docs
+#springdoc.swagger-ui.urls[0].name=Auth Service
+#springdoc.swagger-ui.urls[0].url=/aggregate/auth-mc/v3/api-docs
+
+#springdoc.swagger-ui.urls[1].name=Auth Service
+#springdoc.swagger-ui.urls[1].url=/aggregate/auth-mc/v3/api-docs
+
+# Docker Profile
+---
+spring:
+  config:
+    activate:
+      on-profile: docker
+  cloud:
+    inetutils:
+      default-hostname: ${HOSTNAME}
+
+routes:
+  auth:
+    uri: http://auth-mc-container:8081
+    path: /app/**
+  prediction:
+    uri: http://prediction-mc-container:5000
+    path: /predictor/**
+
+management:
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_ENDPOINT:http://tempo:9411/api/v2/spans}
+
+logging:
+  level:
+    root: INFO
+    org.springframework.cloud.gateway: TRACE
+    org.springframework.cloud.gateway.route.RouteDefinitionLocator: TRACE
+    com.example.microservice.apigateway: TRACE
+    com.example.microservice.apigateway.service: TRACE
+    com.example.microservice.apigateway.config: TRACE
+
+loki:
+  url: http://loki:3100/loki/api/v1/push
+
+# Local Profile
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+  cloud:
+    inetutils:
+      default-hostname: localhost
+      default-ip-address: 127.0.0.1
+
+management:
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_ENDPOINT:http://localhost:9411/api/v2/spans}
+
+routes:
+  auth:
+    uri: http://localhost:8081
+    path: /app/**
+  prediction:
+    uri: http://localhost:5000
+    path: /predictor/**
+
+logging:
+  level:
+    root: INFO
+    org.springframework.cloud.gateway: TRACE
+    org.springframework.cloud.gateway.route.RouteDefinitionLocator: TRACE
+    com.example.microservice.apigateway: TRACE
+    com.example.microservice.apigateway.service: TRACE
+    com.example.microservice.apigateway.config: TRACE
+
+loki:
+  url: http://localhost:3100/loki/api/v1/push

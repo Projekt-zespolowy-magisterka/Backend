@@ -49,6 +49,7 @@ public class SecurityConfig {
     //TODO PUTTING IT PUBLIC CHANGE TO RESTRICTED AFTER FINISH
     private static final String SWAGGER_API = "/swagger-ui.html";
     private static final String PROMETHEUS = "/actuator/prometheus";
+    private static final String PROMETHEUS_PREDICTION = "/metrics";
 
     @Bean
     public SecurityFilterChain SecurityFilterChain(HttpSecurity http) throws Exception {
@@ -57,7 +58,7 @@ public class SecurityConfig {
                 .cors().disable()
                 .authorizeHttpRequests(authorize ->
 //                                authorize.requestMatchers("**").permitAll()
-                                authorize.requestMatchers(PROMETHEUS)
+                                authorize.requestMatchers(PROMETHEUS, PROMETHEUS_PREDICTION)
                                         .permitAll()
                                         .requestMatchers(HttpMethod.GET, SWAGGER_API)
                                         .permitAll()

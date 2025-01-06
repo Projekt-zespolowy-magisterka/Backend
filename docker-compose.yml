@@ -3,54 +3,82 @@ version: '4'
 
 services:
 
-  #  Local setup
   auth-service:
     build:
       context: ./auth-microservice
       dockerfile: Dockerfile
+    image: auth-mc-image:latest
     container_name: auth-mc-container
     ports:
       - "8081:8081"
     labels:
       application: "auth-mc"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+#      - ZIPKIN_URL=http://tempo:9411/api/v2/spans
+      - HOSTNAME=auth-mc-container
+      - ZIPKIN_ENDPOINT=http://tempo:9411/api/v2/spans
 #    depends_on:
 #      mongodb-auth-mc:
 #        condition: service_healthy
 #    networks:
 #      - app-network
 #      - monitoring-network
+    profiles:
+      - docker
     restart: unless-stopped
 
   api-gateway:
     build:
       context: ./api-gateway
       dockerfile: Dockerfile
+    image: api-gateway-image:latest
     container_name: api-gateway-container
     ports:
       - "8080:8080"
     labels:
       application: "api-gateway"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+#      - ZIPKIN_URL=http://tempo:9411/api/v2/spans
+      - ZIPKIN_ENDPOINT=http://tempo:9411/api/v2/spans
+      - HOSTNAME=api-gateway-container
 #    networks:
 #      - app-network
 #      - monitoring-network
+    profiles:
+      - docker
     restart: unless-stopped
 
   price_predictor:
     build:
       context: "D:/Program Files/PycharmProjects/Price_predictor" #TODO changge to your predition project directory
       dockerfile: Dockerfile
+    image: prediction-mc-image:latest
     container_name: prediction-mc-container
     ports:
       - "5000:5000"
+    environment:
+      - TF_CPP_MIN_LOG_LEVEL=3
+      - LOKI_URL=http://loki:3100/loki/api/v1/push
+      - ZIPKIN_ENDPOINT=http://tempo:9411/api/v2/spans
+      - REDIS_HOST=redis-prediction-mc
+      - REDIS_PORT=6379
+      - MONGO_URI=mongodb-prediction-mc:27017
+      - MONGO_DB_NAME=model_db
+      - MONGO_COLLECTION_NAME=models
   #    networks:
   #      - app-network
   #      - monitoring-network
+    profiles:
+      - docker
     restart: unless-stopped
 
   frontend:
     build:
-      context: "D:/Program Files (x86)/IntelJ_Proj/StockMasterFrontend" #TODO changge to your predition project directory
+      context: "D:/Program Files (x86)/IntelJ_Proj/StockMasterFrontend" #TODO changge to your frontend project directory
       dockerfile: docker/Dockerfile
+    image: stockmaster-frontend-image:latest
     container_name: stockmaster-frontend
     ports:
       - "3001:3001"
@@ -58,43 +86,16 @@ services:
         application: "frontend"
     environment:
       - PORT=3001
+    profiles:
+      - docker
     restart: unless-stopped
-
-
-# IMAGE PRODUCTION USE
-  #  auth-service:
-  #    image: your-auth-service-image # Replace with actual image
-  #    container_name: auth-service
-  #    ports:
-  #      - "8081:8081"
-#      labels:
-#        application: "auth-service"
-#      environment:
-#        SPRING_PROFILES_ACTIVE: "docker"
-  #    networks:
-  #      - monitoring
-  #    restart: unless-stopped
-  #
-  #  # Example API Gateway Service (replace with your actual service)
-  #  api-gateway:
-  #    image: your-api-gateway-image # Replace with actual image
-  #    container_name: api-gateway
-  #    ports:
-  #      - "8080:8080"
-  #    labels:
-  #      application: "api-gateway"
-  #    environment:
-  #      SPRING_PROFILES_ACTIVE: "docker"
-  #    networks:
-  #      - monitoring
-  #    restart: unless-stopped
 
 #  Databases
   mongodb-auth-mc:
     image: mongo:5.0
     container_name: mongodb-auth-mc
     ports:
-      - "27019:27017" # Exposes MongoDB on port 27018
+      - "27019:27017"
     volumes:
       - mongodb-auth-mc-data:/data/db
 #    networks:
@@ -106,6 +107,10 @@ services:
     container_name: mongodb-prediction-mc
     ports:
       - "27018:27017"
+    environment:
+      - MONGO_URI=mongodb-prediction-mc:27017 #TODO fix this port???
+      - MONGO_DB_NAME=model_db
+      - MONGO_COLLECTION_NAME=models
     volumes:
       - mongodb-prediction-mc-data:/data/db
 #    networks:
@@ -117,6 +122,10 @@ services:
     container_name: redis-prediction-mc
     ports:
       - "6379:6379"
+    environment:
+      - REDIS_HOST=redis-prediction-mc
+      - REDIS_PORT=6379
+      - REDIS_DB=0
     volumes:
       - redis-prediction-mc-data:/data
 #    networks:
@@ -135,9 +144,25 @@ services:
       - "9090:9090"
     volumes:
       - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    profiles:
+      - docker
 #    networks:
 #      - monitoring-network
 #      - app-network
+    restart: unless-stopped
+
+  prometheus-local:
+    image: prom/prometheus:v2.46.0
+    container_name: prometheus-local
+    command:
+      - --enable-feature=exemplar-storage
+      - --config.file=/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./docker/prometheus/prometheus-local.yml:/etc/prometheus/prometheus.yml:ro
+    profiles:
+      - local
     restart: unless-stopped
 
   # Loki Service (for logging)
@@ -167,7 +192,28 @@ services:
 #    networks:
 #      - monitoring-network
 #      - app-network
+    profiles:
+      - docker
     restart: unless-stopped
+
+  grafana-local:
+    image: grafana/grafana:10.1.0
+    container_name: grafana-local
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./docker/grafana-local:/etc/grafana/provisioning/datasources:ro
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+    #    networks:
+    #      - monitoring-network
+    #      - app-network
+    profiles:
+      - local
+    restart: unless-stopped
+
 
   tempo:
     image: grafana/tempo:2.2.2
@@ -180,8 +226,9 @@ services:
       - ./docker/tempo/tempo.yml:/etc/tempo.yaml:ro
       - ./data/tempo:/tmp/tempo
     ports:
-      - "3110:3100"  # Tempo
-      - "9411:9411" # zipkin TODO FIX IT because it map to localhost and there is no image running of it it is explisicly put
+      - "3110:3100"  # Tempo TODO zmienić na - "3200:3200"??
+      - "9411:9411" # zipkin
+
 
 #Networks
 #networks:

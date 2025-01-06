@@ -1,0 +1,103 @@
+spring:
+  application:
+    name: auth-mc
+  profiles:
+    active: docker
+
+server:
+  port: 8081
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics, prometheus
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http:
+          server:
+            requests: true
+    tags:
+      application: auth-mc
+  tracing:
+    sampling:
+      probability: 1.0
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  endpoint:
+    health:
+      show-details: always
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+
+# Docker Profile
+---
+spring:
+  config:
+    activate:
+      on-profile: docker
+  cloud:
+    inetutils:
+      default-hostname: ${HOSTNAME}
+  data:
+    mongodb:
+      database: auth-microservice
+      uri: mongodb://mongodb-auth-mc:27017/auth-microservice
+
+management:
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_ENDPOINT:http://tempo:9411/api/v2/spans}
+
+logging:
+  level:
+    root: INFO
+    com.example.microservice.AuthMicroservice: TRACE
+    com.example.microservice.AuthMicroservice.controller: TRACE
+    com.example.microservice.AuthMicroservice.entity: TRACE
+    com.example.microservice.AuthMicroservice.exception: TRACE
+    com.example.microservice.AuthMicroservice.service: TRACE
+    com.example.microservice.AuthMicroservice.repository: TRACE
+
+loki:
+  url: http://loki:3100/loki/api/v1/push
+
+
+# Local Profile
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+  cloud:
+    inetutils:
+      default-hostname: localhost
+      default-ip-address: 127.0.0.1
+  data:
+    mongodb:
+      database: auth-microservice
+      uri: mongodb://localhost:27019/auth-microservice
+
+management:
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_ENDPOINT:http://localhost:9411/api/v2/spans}
+
+logging:
+  level:
+    root: INFO
+    com.example.microservice.AuthMicroservice: TRACE
+    com.example.microservice.AuthMicroservice.controller: TRACE
+    com.example.microservice.AuthMicroservice.entity: TRACE
+    com.example.microservice.AuthMicroservice.exception: TRACE
+    com.example.microservice.AuthMicroservice.service: TRACE
+    com.example.microservice.AuthMicroservice.repository: TRACE
+
+loki:
+  url: http://localhost:3100/loki/api/v1/push
